@@ -20,6 +20,27 @@ class RegisterAPIView(APIView):
         profile_data = request.data.get('profile')
 
         user_serializer = UserSerializer(data=user_data)
+        
+        username = user_data.get('username')
+        email = user_data.get('email')
+
+        if User.objects.filter(username=username).exists():
+            return Response(
+                {
+                    'message': 'Username already exists',
+                    'key':'username'
+                    },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {
+                    'message': 'Email already exists',
+                    'key':'email'
+                    },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
 
         if user_serializer.is_valid():
             
@@ -53,7 +74,7 @@ class RegisterAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
                     
-    
+
 
 class LoginAPIView(APIView):
 
@@ -65,16 +86,19 @@ class LoginAPIView(APIView):
         if not user_data:
             return Response({"message": "User data is required"}, status=status.HTTP_400_BAD_REQUEST)
         
-        username = user_data.get('username')
+        email = user_data.get('email')
         password = user_data.get('password')
 
-        if not username or not password:
+        if not email or not password:
             return Response({"message": "Username and password are required"}, status=status.HTTP_400_BAD_REQUEST)
         
-        user = User.objects.filter(username=username).first()
+        user = User.objects.filter(email=email).first()
         
         if not user:
-            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {
+                    "message": "User not found"
+                    }, status=status.HTTP_404_NOT_FOUND)
         
         hashedPass = user.password
         if pwdValidator(password, hashedPass):

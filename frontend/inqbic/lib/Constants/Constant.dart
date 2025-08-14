@@ -1,0 +1,1 @@
+const API = 'http://192.168.10.150:8000/api/v1/auth/';
